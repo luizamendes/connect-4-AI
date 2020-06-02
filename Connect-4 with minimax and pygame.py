@@ -5,6 +5,7 @@
 import numpy as np
 import random
 import pygame
+import pygame_menu
 import sys
 import math
 
@@ -208,6 +209,33 @@ def minimax(board, depth, maximizingPlayer):
 				column = col
 		return column, value
 
+def negamax(board, depth, color):
+	valid_locations = get_valid_locations(board)
+	is_terminal = is_terminal_node(board)
+	if depth == 0 or is_terminal:
+		if is_terminal:
+			if winning_move(board, AI_PIECE):
+				return (None, color * 100000000000000)
+			elif winning_move(board, PLAYER_PIECE):
+				return (None, color * -10000000000000)
+			else: # Game is over, no more valid moves
+				return (None, 0)
+		else: # Depth is zero
+			return (None, color * score_position(board, AI_PIECE))
+
+	value = -math.inf
+	column = random.choice(valid_locations)
+	for col in valid_locations:
+		row = get_next_open_row(board, col)
+		b_copy = board.copy()
+		drop_piece(b_copy, row, col, AI_PIECE)
+		new_score = negamax(b_copy, depth-1, False)[1]
+		if new_score > value:
+			value = new_score
+			column = col
+	return column, value
+
+
 def get_valid_locations(board):
 	valid_locations = []
 	for col in range(COLUMN_COUNT):
@@ -229,71 +257,124 @@ def draw_board(board):
 				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 	pygame.display.update()
 
+
+
 board = create_board()
 print_board(board)
-game_over = False
 
 resposta = input("Deseja colocar as duas IAs para se enfrentar (responda com 's' ou 'n')?")
 
 pygame.init()
 
 SQUARESIZE = 100
-
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT+1) * SQUARESIZE
-
 size = (width, height)
-
 RADIUS = int(SQUARESIZE/2 - 5)
 
 screen = pygame.display.set_mode(size)
 draw_board(board)
 pygame.display.update()
-
 myfont = pygame.font.SysFont("monospace", 75)
 
-turn = random.randint(PLAYER, AI)
+def start_game():
+	game_over = False
+	turn = random.randint(PLAYER, AI)
 
-while not game_over:
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			pygame.display.quit()
-			pygame.quit()
-			sys.exit()
+	while not game_over:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.display.quit()
+				pygame.quit()
+				sys.exit()
 
-		if event.type == pygame.MOUSEMOTION:
-			pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-			posx = event.pos[0]
-			if turn == PLAYER:
-				pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+			if event.type == pygame.MOUSEMOTION:
+				pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
+				posx = event.pos[0]
+				if turn == PLAYER:
+					pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
 
-			pygame.display.update()
-    
-	if resposta == 's' or resposta == 'S':
-        	# # Ask for Player 2 Input
-		if turn == PLAYER and not game_over:				
+				pygame.display.update()
 
+		if resposta == 's' or resposta == 'S':
+				# # Ask for Player 2 Input
+			if turn == PLAYER and not game_over:
+
+				col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, PLAYER_PIECE)
+
+					if winning_move(board, PLAYER_PIECE):
+						label = myfont.render("ALPHA BETA venceu!!", 1, RED)
+						screen.blit(label, (40,10))
+						game_over = True
+
+					print_board(board)
+					draw_board(board)
+
+					turn += 1
+					turn = turn % 2
+					print("turn:", turn)
+
+					# # Ask for Player 2 Input
+			if turn == AI and not game_over:
+				col, minimax_score = minimax(board, 5, True)
+
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, AI_PIECE)
+
+					if winning_move(board, AI_PIECE):
+						label = myfont.render("AI SEM PODA VENCEU!!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
+
+					print_board(board)
+					draw_board(board)
+
+					turn += 1
+					turn = turn % 2
+		else:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.display.quit()
+					pygame.quit()
+					sys.exit()
+
+				if event.type == pygame.MOUSEMOTION:
+					pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
+					posx = event.pos[0]
+					if turn == PLAYER:
+						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+
+				pygame.display.update()
+
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
+					if turn == PLAYER:
+						posx = event.pos[0]
+						col = int(math.floor(posx/SQUARESIZE))
+
+						if is_valid_location(board, col):
+							row = get_next_open_row(board, col)
+							drop_piece(board, row, col, PLAYER_PIECE)
+
+							if winning_move(board, PLAYER_PIECE):
+								label = myfont.render("HUMANO VENCEU!!", 1, RED)
+								screen.blit(label, (40,10))
+								game_over = True
+
+							turn += 1
+							turn = turn % 2
+
+							print_board(board)
+							draw_board(board)
+
+		# # Ask for Player 2 Input
+		if turn == AI and not game_over:
 			col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
-
-			if is_valid_location(board, col):
-				row = get_next_open_row(board, col)
-				drop_piece(board, row, col, PLAYER_PIECE)
-
-				if winning_move(board, PLAYER_PIECE):
-					label = myfont.render("ALPHA BETA venceu!!", 1, RED)
-					screen.blit(label, (40,10))
-					game_over = True
-
-				print_board(board)
-				draw_board(board)
-
-				turn += 1
-				turn = turn % 2
-				print("turn:", turn)
-                
-                # # Ask for Player 2 Input
-		if turn == AI and not game_over:				
-			col, minimax_score = minimax(board, 5, True)
 
 			if is_valid_location(board, col):
 				row = get_next_open_row(board, col)
@@ -309,63 +390,36 @@ while not game_over:
 
 				turn += 1
 				turn = turn % 2
-	else:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.display.quit()
-				pygame.quit()
-				sys.exit()
 
-			if event.type == pygame.MOUSEMOTION:
-				pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-				posx = event.pos[0]
-				if turn == PLAYER:
-					pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+		# if game_over:
+		# 	for event in pygame.event.get():
+		# 		if event.type == pygame.QUIT:
+		# 			pygame.display.quit()
 
-			pygame.display.update()
+# start_game()
 
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-				if turn == PLAYER:
-					posx = event.pos[0]
-					col = int(math.floor(posx/SQUARESIZE))
+def set_difficulty(value, difficulty):
+	print(value)
+	print(difficulty)
 
-					if is_valid_location(board, col):
-						row = get_next_open_row(board, col)
-						drop_piece(board, row, col, PLAYER_PIECE)
+def set_double_ai(value, difficulty):
+	print(value)
+	print(difficulty)
 
-						if winning_move(board, PLAYER_PIECE):
-							label = myfont.render("HUMANO VENCEU!!", 1, RED)
-							screen.blit(label, (40,10))
-							game_over = True
+def start_the_game(args):
+	pygame_menu.events.CLOSE
+	start_game()
 
-						turn += 1
-						turn = turn % 2
+def draw_menu(screen):
+	print('drawing menu')
+	menu = pygame_menu.Menu(300, 400, 'Connect4',
+							theme=pygame_menu.themes.THEME_BLUE)
 
-						print_board(board)
-						draw_board(board)
+	menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+	menu.add_selector('IA x IA :', [('Nao', 1), ('Sim', 2)], onchange=set_double_ai)
+	menu.add_button('Play', start_the_game, screen)
+	menu.add_button('Quit', pygame_menu.events.EXIT)
 
+	menu.mainloop(screen)
 
-	# # Ask for Player 2 Input
-	if turn == AI and not game_over:
-		col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
-
-		if is_valid_location(board, col):
-			row = get_next_open_row(board, col)
-			drop_piece(board, row, col, AI_PIECE)
-
-			if winning_move(board, AI_PIECE):
-				label = myfont.render("AI SEM PODA VENCEU!!!", 1, YELLOW)
-				screen.blit(label, (40,10))
-				game_over = True
-
-			print_board(board)
-			draw_board(board)
-
-			turn += 1
-			turn = turn % 2
-
-	if game_over:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.display.quit()
+draw_menu(screen)
