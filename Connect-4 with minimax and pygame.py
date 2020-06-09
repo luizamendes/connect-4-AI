@@ -122,8 +122,9 @@ def score_position(board, piece):
 	return score
 
 def is_terminal_node(board):
-	return winning_move(board, PLAYER_PIECE) or winning_move(board, AI_PIECE) or len(get_valid_locations(board)) == 0
+	return winning_move(board, AI_PIECE) or winning_move(board, PLAYER_PIECE) or len(get_valid_locations(board)) == 0
 
+# Minimax com poda
 def minimaxAB(board, depth, alpha, beta, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
 	is_terminal = is_terminal_node(board)
@@ -168,7 +169,8 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer):
 			if alpha >= beta:
 				break
 		return column, value
-    
+
+# Minimax sem poda    
 def minimax(board, depth, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
 	is_terminal = is_terminal_node(board)
@@ -207,6 +209,79 @@ def minimax(board, depth, maximizingPlayer):
 				value = new_score
 				column = col
 		return column, value
+
+# Negamax sem poda
+def negamax(board, depth, piece):
+	opp_piece = PLAYER_PIECE
+	if piece == PLAYER_PIECE:
+		opp_piece = AI_PIECE
+	
+	valid_locations = get_valid_locations(board)
+	is_terminal = is_terminal_node(board)
+	if depth == 0 or is_terminal:
+		if is_terminal:
+			if winning_move(board, piece):
+				return (None, 100000000000000)
+			elif winning_move(board, opp_piece):
+				return (None, -10000000000000)
+			else: # Game is over, no more valid moves
+				return (None, 0)
+		else: # Depth is zero
+			return (None, score_position(board, piece))
+			
+	value = -math.inf
+	column = random.choice(valid_locations)
+
+	for col in valid_locations:
+		row = get_next_open_row(board, col)
+		b_copy = board.copy()
+		drop_piece(b_copy, row, col, piece)
+		if piece == PLAYER_PIECE:
+			new_score = -negamax(b_copy, depth-1, AI_PIECE)[1]
+		else:
+			new_score = -negamax(b_copy, depth-1, PLAYER_PIECE)[1]
+		if new_score > value:
+			value = new_score
+			column = col
+	return column, value
+
+# Negamax sem poda
+def negamaxAB(board, depth, piece, alpha, beta):
+	opp_piece = PLAYER_PIECE
+	if piece == PLAYER_PIECE:
+		opp_piece = AI_PIECE
+	
+	valid_locations = get_valid_locations(board)
+	is_terminal = is_terminal_node(board)
+	if depth == 0 or is_terminal:
+		if is_terminal:
+			if winning_move(board, piece):
+				return (None, 100000000000000)
+			elif winning_move(board, opp_piece):
+				return (None, -10000000000000)
+			else: # Game is over, no more valid moves
+				return (None, 0)
+		else: # Depth is zero
+			return (None, score_position(board, piece))
+			
+	value = -math.inf
+	column = random.choice(valid_locations)
+
+	for col in valid_locations:
+		row = get_next_open_row(board, col)
+		b_copy = board.copy()
+		drop_piece(b_copy, row, col, piece)
+		if piece == PLAYER_PIECE:
+			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -math.inf, -math.inf)[1]
+		else:
+			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -math.inf, -math.inf)[1]
+		if new_score > value:
+			value = new_score
+			column = col
+		alpha = max(alpha, value)
+		if alpha >= beta:
+			break
+	return column, value
 
 def get_valid_locations(board):
 	valid_locations = []
@@ -247,6 +322,7 @@ size = (width, height)
 RADIUS = int(SQUARESIZE/2 - 5)
 
 screen = pygame.display.set_mode(size)
+pygame.display.set_caption("Lig-4")
 draw_board(board)
 pygame.display.update()
 
@@ -270,9 +346,8 @@ while not game_over:
 			pygame.display.update()
     
 	if resposta == 's' or resposta == 'S':
-        	# # Ask for Player 2 Input
+		# AI with Minimax with pruning
 		if turn == PLAYER and not game_over:				
-
 			col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
 			if is_valid_location(board, col):
@@ -291,7 +366,7 @@ while not game_over:
 				turn = turn % 2
 				print("turn:", turn)
                 
-                # # Ask for Player 2 Input
+        # AI with Minimax without pruning
 		if turn == AI and not game_over:				
 			col, minimax_score = minimax(board, 5, True)
 
@@ -312,9 +387,8 @@ while not game_over:
 	else:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				pygame.display.quit()
+				pygame.time.wait(3000)
 				pygame.quit()
-				sys.exit()
 
 			if event.type == pygame.MOUSEMOTION:
 				pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
@@ -346,16 +420,17 @@ while not game_over:
 						draw_board(board)
 
 
-	# # Ask for Player 2 Input
+	# # Human turn
 	if turn == AI and not game_over:
-		col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+		col, minimax_score = negamaxAB(board, 5, AI_PIECE, -math.inf, math.inf)
+		# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
 		if is_valid_location(board, col):
 			row = get_next_open_row(board, col)
 			drop_piece(board, row, col, AI_PIECE)
 
 			if winning_move(board, AI_PIECE):
-				label = myfont.render("AI SEM PODA VENCEU!!!", 1, YELLOW)
+				label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
 				screen.blit(label, (40,10))
 				game_over = True
 
