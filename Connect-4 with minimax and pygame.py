@@ -11,6 +11,7 @@ import math
 BLUE = (0,0,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
+GREY = (160, 160, 160)
 YELLOW = (255,255,0)
 
 ROW_COUNT = 6
@@ -22,11 +23,23 @@ AI = 1
 EMPTY = 0
 PLAYER_PIECE = 1
 AI_PIECE = 2
+BLOCKER_PIECE = 3
 
 WINDOW_LENGTH = 4
 
-def create_board():
+def create_board(blockers = False):
 	board = np.zeros((ROW_COUNT,COLUMN_COUNT))
+
+	if blockers:
+		totalPositions = ROW_COUNT * COLUMN_COUNT
+		totalBlocks = round(0.2 * totalPositions) # 20% das posicoes
+		positionsOfBlocks = []
+		for x in range(totalBlocks):
+			positionsOfBlocks.append(random.randint(0, totalPositions))
+		
+		for i in positionsOfBlocks:
+			board.flat[i] = 3
+
 	return board
 
 def drop_piece(board, row, col, piece):
@@ -302,6 +315,9 @@ def draw_board(board):
 				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 			elif board[r][c] == AI_PIECE: 
 				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+			elif board[r][c] == BLOCKER_PIECE:
+				pygame.draw.circle(screen, GREY, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+			
 	pygame.display.update()
 
 board = create_board()
