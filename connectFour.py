@@ -33,10 +33,10 @@ def create_board(blockers = False):
 
 	if blockers:
 		totalPositions = ROW_COUNT * COLUMN_COUNT
-		totalBlocks = round(0.2 * totalPositions) # 20% das posicoes
+		totalBlocks = round(0.20 * totalPositions) # 20% das posicoes
 		positionsOfBlocks = []
 		for x in range(totalBlocks):
-			positionsOfBlocks.append(random.randint(0, totalPositions))
+			positionsOfBlocks.append(random.randint(0, totalPositions - COLUMN_COUNT))
 		
 		for i in positionsOfBlocks:
 			board.flat[i] = 3
