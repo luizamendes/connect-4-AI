@@ -258,7 +258,7 @@ def negamax(board, depth, piece):
 			column = col
 	return column, value
 
-# Negamax sem poda
+# Negamax com poda
 def negamaxAB(board, depth, piece, alpha, beta):
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
@@ -285,9 +285,9 @@ def negamaxAB(board, depth, piece, alpha, beta):
 		b_copy = board.copy()
 		drop_piece(b_copy, row, col, piece)
 		if piece == PLAYER_PIECE:
-			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -math.inf, -math.inf)[1]
+			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -math.inf, math.inf)[1]
 		else:
-			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -math.inf, -math.inf)[1]
+			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -math.inf, math.inf)[1]
 		if new_score > value:
 			value = new_score
 			column = col
@@ -459,6 +459,5 @@ def start(value, difficulty=0):
 				turn = turn % 2
 
 		if game_over:
-			print('entrou')
 			pygame.quit()
 			quit()
