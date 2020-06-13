@@ -338,7 +338,7 @@ pygame.display.set_caption("Lig-4")
 myfont = pygame.font.SysFont("monospace", 75)
 
 
-def start(value, difficulty=0):
+def start(value, difficulty=0, withOrWithoutPodaAB=0):
 	if difficulty == 2:
 		board = create_board(True)
 	else:
@@ -441,23 +441,42 @@ def start(value, difficulty=0):
 
 		# # Human turn
 		if turn == AI and not game_over:
-			col, minimax_score = negamaxAB(board, 5, AI_PIECE, -math.inf, math.inf)
-			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+			if withOrWithoutPodaAB == 1:
+				col, minimax_score = negamaxAB(board, 5, AI_PIECE, -math.inf, math.inf)
+				# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
-			if is_valid_location(board, col):
-				row = get_next_open_row(board, col)
-				drop_piece(board, row, col, AI_PIECE)
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, AI_PIECE)
 
-				if winning_move(board, AI_PIECE):
-					label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
-					screen.blit(label, (40,10))
-					game_over = True
+					if winning_move(board, AI_PIECE):
+						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
 
-				print_board(board)
-				draw_board(board)
+					print_board(board)
+					draw_board(board)
 
-				turn += 1
-				turn = turn % 2
+					turn += 1
+					turn = turn % 2
+			elif withOrWithoutPodaAB == 2:
+				col, minimax_score = negamax(board, 5, AI_PIECE)
+				# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, AI_PIECE)
+
+					if winning_move(board, AI_PIECE):
+						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
+
+					print_board(board)
+					draw_board(board)
+
+					turn += 1
+					turn = turn % 2
 
 		if game_over:
 			print('entrou')
