@@ -285,9 +285,9 @@ def negamaxAB(board, depth, piece, alpha, beta):
 		b_copy = board.copy()
 		drop_piece(b_copy, row, col, piece)
 		if piece == PLAYER_PIECE:
-			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -math.inf, math.inf)[1]
+			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -beta, -alpha)[1]
 		else:
-			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -math.inf, math.inf)[1]
+			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -beta, -alpha)[1]
 		if new_score > value:
 			value = new_score
 			column = col
