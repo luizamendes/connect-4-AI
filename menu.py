@@ -108,7 +108,7 @@ while sair:
 		choice_1_text_render = font.render(choice_1_text, True, azul)
 		fundo.blit(choice_1_text_render,(200, 300))
 	
-	    if next_step == 2:
+	if next_step == 2:
         if menu_choices['choice_1'] == 2:
             choice_1_text = 'Humano contra AI'
             menu_step_text = "Contra qual IA?"
