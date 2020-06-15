@@ -21,7 +21,7 @@ pygame.display.set_caption('Connect 4')
 
 sair = True
 
-menu_choices = {'choice_1': 0, 'choice_2': 0}
+menu_choices = {'choice_1': 0, 'choice_2': 0, 'choice_3': 0}
 
 menu_step_font = pygame.font.SysFont("comicsansms", 50)
 font = pygame.font.SysFont("comicsansms", 30)
@@ -32,18 +32,22 @@ choice_1_text_render = font.render(choice_1_text, True, azul)
 choice_2_text = ''
 choice_2_text_render = font.render(choice_2_text, True, azul)
 
+choice_3_text = ''
+choice_3_text_render = font.render(choice_3_text, True, azul)
+
 menu_step_text = "Modo de Jogo"
 menu_step_text_render = menu_step_font.render(menu_step_text, True, azul)
 
 text_1 = "1 - AI contra AI"
 text_2 = "2 - Humano contra AI"
+text_3 = ""
 text_1_render = font.render(text_1, True, vermelho)
 text_2_render = font.render(text_2, True, vermelho)
+text_3_render = font.render(text_3, True, vermelho)
 
 start_game_text = 'Aperte o Enter para começar'
 start_game_text_render = font.render(start_game_text, True, preto)
 
-AI_X_AI_flag = False
 next_step = 0
 
 while sair:
@@ -55,37 +59,40 @@ while sair:
     fundo.blit(menu_step_text_render, (200, 100))
     fundo.blit(text_1_render,(200, 170))
     fundo.blit(text_2_render,(200, 200))
+    fundo.blit(text_3_render,(200, 230))
 
-    if event.type == pygame.KEYDOWN:# 1=49, 2=50
+    if event.type == pygame.KEYDOWN:# 1=49, 2=50, 3=51, 4=52, 5=53, 6=54, 7=55
         if next_step == 0:
             if event.key == 49:
                 menu_choices['choice_1'] = 1
+                next_step = 3
+
             if event.key == 50:
                 menu_choices['choice_1'] = 2
                 next_step = 1
-            if event.key == 13:
-                from connectFour import start
-                start(menu_choices['choice_1'])
 
         elif next_step == 1:
             if event.key == 51:
                 menu_choices['choice_2'] = 1
                 next_step = 2      
+
             if event.key == 52:
                 menu_choices['choice_2'] = 2
                 next_step = 2
-        elif next_step == 2:
+        
+        elif next_step == 3:
+            if event.key == 53:
+                menu_choices['choice_3'] = 4
+
+            if event.key == 54:
+                menu_choices['choice_3'] = 5
+
+            if event.key == 55:
+                menu_choices['choice_3'] = 6
+            
             if event.key == 13:
                 from connectFour import start
-                start(menu_choices['choice_1'], menu_choices['choice_2'])
-
-    if menu_choices['choice_1'] == 1:
-        choice_1_text = 'Modo: AI contra AI'
-        fundo.blit(start_game_text_render, (180, 300))
-        choice_1_text_render = font.render(choice_1_text, True, azul)
-        fundo.blit(choice_1_text_render,(220, 230))
-        text_1_render = font.render(text_1, True, branco)
-        text_2_render = font.render(text_2, True, branco)
+                start(menu_choices['choice_1'], menu_choices['choice_3'], menu_choices['choice_2'])
 
     if next_step == 1:
         if menu_choices['choice_1'] == 2:
@@ -96,20 +103,61 @@ while sair:
             text_2 = '4 - Difícil'
             text_1_render = font.render(text_1, True, vermelho)
             text_2_render = font.render(text_2, True, vermelho)
-        choice_1_text_render = font.render(choice_1_text, True, azul)
-        fundo.blit(choice_1_text_render,(200, 300))
+            choice_1_text_render = font.render(choice_1_text, True, azul)
+            fundo.blit(choice_1_text_render,(200, 230))
     
     if next_step == 2:
         if menu_choices['choice_2'] == 1:
             choice_2_text = 'Nível fácil'
+            next_step = 3
         if menu_choices['choice_2'] == 2:
             choice_2_text = 'Nível difícil'
-        fundo.blit(start_game_text_render, (180, 300))
+            next_step = 3
         choice_2_text_render = font.render(choice_2_text, True, azul)
         fundo.blit(choice_1_text_render,(220, 230))
         fundo.blit(choice_2_text_render,(220, 260))
-        text_1_render = font.render(text_1, True, branco)
-        text_2_render = font.render(text_2, True, branco)
+
+    if next_step == 3:
+        text_1 = "5 - 4 em linha"
+        text_2 = "6 - 5 em linha"
+        text_3 = "7 - 6 em linha"
+        text_1_render = font.render(text_1, True, vermelho)
+        text_2_render = font.render(text_2, True, vermelho)
+        text_3_render = font.render(text_3, True, vermelho)
+
+        menu_step_text = "Critério de vitória"
+        menu_step_text_render = menu_step_font.render(menu_step_text, True, azul)
+
+        if menu_choices['choice_1'] == 1:
+            choice_1_text = 'Modo: AI contra AI'
+
+        if menu_choices['choice_2'] == 1:
+            choice_1_text = 'Modo: Humano contra AI'
+
+        if menu_choices['choice_2'] == 2:
+            choice_1_text = 'Modo: Humano contra AI'
+
+        choice_1_text_render = font.render(choice_1_text, True, azul)
+        fundo.blit(choice_1_text_render,(220, 260))
+        fundo.blit(choice_2_text_render,(220, 290))
+
+        if menu_choices['choice_3'] == 4:
+            fundo.blit(start_game_text_render, (180, 380))
+            choice_3_text = "Vitória: 4 em linha"
+
+        if menu_choices['choice_3'] == 5:
+            fundo.blit(start_game_text_render, (180, 380))
+            choice_3_text = "Vitória: 5 em linha"
+
+        if menu_choices['choice_3'] == 6:
+            fundo.blit(start_game_text_render, (180, 380))
+            choice_3_text = "Vitória: 6 em linha"
+
+        choice_3_text_render = font.render(choice_3_text, True, azul)
+        if choice_2_text != '':
+            fundo.blit(choice_3_text_render,(220,320))
+        else:
+            fundo.blit(choice_3_text_render,(220,290))
                     
     pygame.display.update()
     

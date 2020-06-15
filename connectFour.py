@@ -28,6 +28,8 @@ BLOCKER_PIECE = 3
 
 WINDOW_LENGTH = 4
 
+VICTORY_CONDITION = 4
+
 def create_board(blockers = False):
 	board = np.zeros((ROW_COUNT,COLUMN_COUNT))
 
@@ -56,30 +58,56 @@ def get_next_open_row(board, col):
 def print_board(board):
 	print(np.flip(board, 0))
 
-def winning_move(board, piece):
+def winning_move(board, piece, n):
+	count = 0
 	# Check horizontal locations for win
-	for c in range(COLUMN_COUNT-3):
+	for c in range(ROW_COUNT):
 		for r in range(ROW_COUNT):
-			if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] == piece and board[r][c+3] == piece:
+			for i in range(n):
+				if(c + i < ROW_COUNT):
+					if(board[r][c + i] == piece):
+						count += 1
+			if count == n:
 				return True
+			else:
+				count = 0
+	
 
 	# Check vertical locations for win
 	for c in range(COLUMN_COUNT):
-		for r in range(ROW_COUNT-3):
-			if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
+		for r in range(n):
+			for i in range(n):
+				if(r + i < ROW_COUNT):
+					if(board[r + i][c] == piece):
+						count += 1
+			if(count == n):
 				return True
+			else:
+				count = 0
 
 	# Check positively sloped diaganols
-	for c in range(COLUMN_COUNT-3):
-		for r in range(ROW_COUNT-3):
-			if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
+	for c in range(n):
+		for r in range(n):
+			for i in range(n):
+				if(r + i < ROW_COUNT and c + i < ROW_COUNT):
+					if(board[r + i][c + i] == piece):
+						count += 1
+			if(count == n):
 				return True
+			else:
+				count = 0
 
 	# Check negatively sloped diaganols
-	for c in range(COLUMN_COUNT-3):
-		for r in range(3, ROW_COUNT):
-			if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
+	for c in range(n):
+		for r in range(n):
+			for i in range(n):
+				if(r + i < ROW_COUNT and c + i < ROW_COUNT):
+					if(board[r - i][c + i] == piece):
+						count += 1
+			if count == n:
 				return True
+			else:
+				count = 0
 
 def evaluate_window(window, piece):
 	score = 0
@@ -135,7 +163,7 @@ def score_position(board, piece):
 	return score
 
 def is_terminal_node(board):
-	return winning_move(board, AI_PIECE) or winning_move(board, PLAYER_PIECE) or len(get_valid_locations(board)) == 0
+	return winning_move(board, AI_PIECE, VICTORY_CONDITION) or winning_move(board, PLAYER_PIECE, VICTORY_CONDITION) or len(get_valid_locations(board)) == 0
 
 # Minimax com poda
 def minimaxAB(board, depth, alpha, beta, maximizingPlayer):
@@ -143,9 +171,9 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer):
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, AI_PIECE):
+			if winning_move(board, AI_PIECE, VICTORY_CONDITION):
 				return (None, 100000000000000)
-			elif winning_move(board, PLAYER_PIECE):
+			elif winning_move(board, PLAYER_PIECE, VICTORY_CONDITION):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
@@ -189,9 +217,9 @@ def minimax(board, depth, maximizingPlayer):
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, AI_PIECE):
+			if winning_move(board, AI_PIECE, VICTORY_CONDITION):
 				return (None, 100000000000000)
-			elif winning_move(board, PLAYER_PIECE):
+			elif winning_move(board, PLAYER_PIECE, VICTORY_CONDITION):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
@@ -233,9 +261,9 @@ def negamax(board, depth, piece):
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, piece):
+			if winning_move(board, piece, VICTORY_CONDITION):
 				return (None, 100000000000000)
-			elif winning_move(board, opp_piece):
+			elif winning_move(board, opp_piece, VICTORY_CONDITION):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
@@ -268,9 +296,9 @@ def negamaxAB(board, depth, piece, alpha, beta):
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, piece):
+			if winning_move(board, piece, VICTORY_CONDITION):
 				return (None, 100000000000000)
-			elif winning_move(board, opp_piece):
+			elif winning_move(board, opp_piece, VICTORY_CONDITION):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
@@ -337,7 +365,7 @@ pygame.display.set_caption("Lig-4")
 myfont = pygame.font.SysFont("monospace", 75)
 
 
-def start(value, difficulty=0):
+def start(value, criterion, difficulty=0):
 	if difficulty == 2:
 		board = create_board(True)
 	else:
@@ -347,6 +375,7 @@ def start(value, difficulty=0):
 	pygame.display.update()
 	game_over = False
 	turn = random.randint(PLAYER, AI)
+	VICTORY_CONDITION = criterion
 
 	while not game_over:
 		for event in pygame.event.get():
@@ -372,8 +401,8 @@ def start(value, difficulty=0):
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, PLAYER_PIECE)
 
-					if winning_move(board, PLAYER_PIECE):
-						label = myfont.render("ALPHA BETA venceu!!", 1, RED)
+					if winning_move(board, PLAYER_PIECE, VICTORY_CONDITION):
+						label = myfont.render("MINIMAX VENCEU!!!", 1, RED)
 						screen.blit(label, (40,10))
 						game_over = True
 
@@ -384,16 +413,16 @@ def start(value, difficulty=0):
 					turn = turn % 2
 					print("turn:", turn)
 					
-			# AI with Minimax without pruning
+			# AI with Negamax with pruning
 			if turn == AI and not game_over:				
-				col, minimax_score = minimax(board, 5, True)
+				col, minimax_score = negamaxAB(board, 5, AI_PIECE, -math.inf, math.inf)
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, AI_PIECE)
 
-					if winning_move(board, AI_PIECE):
-						label = myfont.render("AI SEM PODA VENCEU!!!", 1, YELLOW)
+					if winning_move(board, AI_PIECE, VICTORY_CONDITION):
+						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
 						screen.blit(label, (40,10))
 						game_over = True
 
@@ -426,8 +455,8 @@ def start(value, difficulty=0):
 							row = get_next_open_row(board, col)
 							drop_piece(board, row, col, PLAYER_PIECE)
 
-							if winning_move(board, PLAYER_PIECE):
-								label = myfont.render("HUMANO VENCEU!!", 1, RED)
+							if winning_move(board, PLAYER_PIECE, VICTORY_CONDITION):
+								label = myfont.render("HUMANO VENCEU!!!", 1, RED)
 								screen.blit(label, (40,10))
 								game_over = True
 
@@ -438,7 +467,7 @@ def start(value, difficulty=0):
 							draw_board(board)
 
 
-		# # Human turn
+		# AI Negamax turn
 		if turn == AI and not game_over:
 			col, minimax_score = negamaxAB(board, 5, AI_PIECE, -math.inf, math.inf)
 			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
@@ -447,7 +476,7 @@ def start(value, difficulty=0):
 				row = get_next_open_row(board, col)
 				drop_piece(board, row, col, AI_PIECE)
 
-				if winning_move(board, AI_PIECE):
+				if winning_move(board, AI_PIECE, VICTORY_CONDITION):
 					label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
 					screen.blit(label, (40,10))
 					game_over = True
