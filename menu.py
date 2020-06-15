@@ -68,8 +68,8 @@ while sair:
 				start(menu_choices['choice_1'])
 
 		elif next_step == 1:
-            if event.key == 51:
-                menu_choices['choice_2'] = 1
+    		if event.key == 51:
+    			menu_choices['choice_2'] = 1
                 next_step = 2      
             if event.key == 52:
                 menu_choices['choice_2'] = 2
