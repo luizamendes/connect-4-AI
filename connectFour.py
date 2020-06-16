@@ -63,7 +63,7 @@ def winning_move(board, piece, n):
 	for c in range(ROW_COUNT):
 		for r in range(ROW_COUNT):
 			for i in range(n):
-				if(c + i < ROW_COUNT):
+				if(c + i < COLUMN_COUNT):
 					if(board[r][c + i] == piece):
 						count += 1
 			if count == n:
@@ -108,25 +108,25 @@ def winning_move(board, piece, n):
 			else:
 				count = 0
 
-def evaluate_window(window, piece):
+def evaluate_window(window, piece, criterion):
 	score = 0
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
 		opp_piece = AI_PIECE
 
-	if window.count(piece) == 4:
+	if window.count(piece) == criterion:
 		score += 100
-	elif window.count(piece) == 3 and window.count(EMPTY) == 1:
+	elif window.count(piece) == criterion - 1 and window.count(EMPTY) == 1:
 		score += 5
-	elif window.count(piece) == 2 and window.count(EMPTY) == 2:
+	elif window.count(piece) == criterion - 2 and window.count(EMPTY) == 2:
 		score += 2
 
-	if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
+	if window.count(opp_piece) == criterion - 1 and window.count(EMPTY) == 1:
 		score -= 4
 
 	return score
 
-def score_position(board, piece):
+def score_position(board, piece, criterion):
 	score = 0
 
 	## Score center column
@@ -139,25 +139,25 @@ def score_position(board, piece):
 		row_array = [int(i) for i in list(board[r,:])]
 		for c in range(COLUMN_COUNT-3):
 			window = row_array[c:c+WINDOW_LENGTH]
-			score += evaluate_window(window, piece)
+			score += evaluate_window(window, piece, criterion)
 
 	## Score Vertical
 	for c in range(COLUMN_COUNT):
 		col_array = [int(i) for i in list(board[:,c])]
 		for r in range(ROW_COUNT-3):
 			window = col_array[r:r+WINDOW_LENGTH]
-			score += evaluate_window(window, piece)
+			score += evaluate_window(window, piece, criterion)
 
 	## Score posiive sloped diagonal
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+i][c+i] for i in range(WINDOW_LENGTH)]
-			score += evaluate_window(window, piece)
+			score += evaluate_window(window, piece, criterion)
 
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+3-i][c+i] for i in range(WINDOW_LENGTH)]
-			score += evaluate_window(window, piece)
+			score += evaluate_window(window, piece, criterion)
 
 	return score
 
@@ -177,7 +177,7 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer, condition):
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, AI_PIECE))
+			return (None, score_position(board, AI_PIECE, condition))
 	if maximizingPlayer:
 		value = -math.inf
 		column = random.choice(valid_locations)
@@ -223,7 +223,7 @@ def minimax(board, depth, maximizingPlayer, condition):
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, AI_PIECE))
+			return (None, score_position(board, AI_PIECE, condition))
 	if maximizingPlayer:
 		value = -math.inf
 		column = random.choice(valid_locations)
@@ -267,7 +267,7 @@ def negamax(board, depth, piece, condition):
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, piece))
+			return (None, score_position(board, piece, condition))
 			
 	value = -math.inf
 	column = random.choice(valid_locations)
@@ -302,7 +302,7 @@ def negamaxAB(board, depth, piece, alpha, beta, condition):
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, piece))
+			return (None, score_position(board, piece, condition))
 			
 	value = -math.inf
 	column = random.choice(valid_locations)
@@ -383,6 +383,8 @@ def start(value, criterion, difficulty=0):
 	pygame.display.update()
 	game_over = False
 	turn = random.randint(PLAYER, AI)
+
+	print('critério',criterion)
 	
 	while not game_over:
 		for event in pygame.event.get():
@@ -476,7 +478,7 @@ def start(value, criterion, difficulty=0):
 		# AI Negamax turn
 		if turn == AI and not game_over:
 			print('negamax depth', depth)
-			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf, criterion)
+			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, -math.inf, criterion)
 			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
 			if is_valid_location(board, col):
