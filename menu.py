@@ -79,15 +79,19 @@ while sair:
             if event.key == 52:
                 menu_choices['choice_2'] = 2
                 next_step = 2
+
+            if event.key == 53:
+                menu_choices['choice_2'] = 3
+                next_step = 2
         
         elif next_step == 3:
-            if event.key == 53:
+            if event.key == 54:
                 menu_choices['choice_3'] = 4
 
-            if event.key == 54:
+            if event.key == 55:
                 menu_choices['choice_3'] = 5
 
-            if event.key == 55:
+            if event.key == 56:
                 menu_choices['choice_3'] = 6
             
             if event.key == 13:
@@ -100,27 +104,35 @@ while sair:
             menu_step_text = "Nível de Dificuldade"
             menu_step_text_render = menu_step_font.render(menu_step_text, True, azul)
             text_1 = '3 - Fácil'
-            text_2 = '4 - Difícil'
+            text_2 = '4 - Médio'
+            text_3 = '5 - Difícil'
             text_1_render = font.render(text_1, True, vermelho)
             text_2_render = font.render(text_2, True, vermelho)
+            text_3_render = font.render(text_3, True, vermelho)
             choice_1_text_render = font.render(choice_1_text, True, azul)
-            fundo.blit(choice_1_text_render,(200, 230))
+            fundo.blit(choice_1_text_render,(200, 260))
     
     if next_step == 2:
         if menu_choices['choice_2'] == 1:
             choice_2_text = 'Nível fácil'
             next_step = 3
         if menu_choices['choice_2'] == 2:
-            choice_2_text = 'Nível difícil'
+            choice_2_text = 'Nível médio'
             next_step = 3
+        if menu_choices['choice_2'] == 3:
+            choice_3_text = 'Nível difícil'
+            next_step = 3
+        choice_1_text_render = font.render(choice_1_text, True, azul)
         choice_2_text_render = font.render(choice_2_text, True, azul)
-        fundo.blit(choice_1_text_render,(220, 230))
-        fundo.blit(choice_2_text_render,(220, 260))
+        choice_3_text_render = font.render(choice_3_text, True, azul)
+        fundo.blit(choice_1_text_render,(220, 260))
+        fundo.blit(choice_2_text_render,(220, 290))
+        fundo.blit(choice_3_text_render,(220, 320))
 
     if next_step == 3:
-        text_1 = "5 - 4 em linha"
-        text_2 = "6 - 5 em linha"
-        text_3 = "7 - 6 em linha"
+        text_1 = "6 - 4 em linha"
+        text_2 = "7 - 5 em linha"
+        text_3 = "8 - 6 em linha"
         text_1_render = font.render(text_1, True, vermelho)
         text_2_render = font.render(text_2, True, vermelho)
         text_3_render = font.render(text_3, True, vermelho)
