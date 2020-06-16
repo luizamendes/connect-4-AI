@@ -478,7 +478,7 @@ def start(value, criterion, difficulty=0):
 		# AI Negamax turn
 		if turn == AI and not game_over:
 			print('negamax depth', depth)
-			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, -math.inf, criterion)
+			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf, criterion)
 			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
 			if is_valid_location(board, col):
