@@ -120,7 +120,7 @@ while sair:
             choice_2_text = 'Nível médio'
             next_step = 3
         if menu_choices['choice_2'] == 3:
-            choice_3_text = 'Nível difícil'
+            choice_2_text = 'Nível difícil'
             next_step = 3
         choice_1_text_render = font.render(choice_1_text, True, azul)
         choice_2_text_render = font.render(choice_2_text, True, azul)

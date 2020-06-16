@@ -368,10 +368,10 @@ def start(value, criterion, difficulty=0):
 	block = False
 	depth = 5
 	if difficulty == 1:
-		depth = 1
+		depth = 3
 
 	elif difficulty == 2:
-		depth = 3
+		depth = 5
 		
 	elif difficulty == 3:
 		depth = 5
@@ -383,8 +383,6 @@ def start(value, criterion, difficulty=0):
 	pygame.display.update()
 	game_over = False
 	turn = random.randint(PLAYER, AI)
-
-	print('depth',depth)
 	
 	while not game_over:
 		for event in pygame.event.get():
@@ -420,7 +418,6 @@ def start(value, criterion, difficulty=0):
 
 					turn += 1
 					turn = turn % 2
-					print("turn:", turn)
 					
 			# AI with Negamax with pruning
 			if turn == AI and not game_over:				
@@ -478,6 +475,7 @@ def start(value, criterion, difficulty=0):
 
 		# AI Negamax turn
 		if turn == AI and not game_over:
+			print('negamax depth', depth)
 			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf, criterion)
 			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
