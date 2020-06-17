@@ -336,7 +336,7 @@ pygame.display.set_caption("Lig-4")
 myfont = pygame.font.SysFont("monospace", 75)
 
 
-def start(value, difficulty=0):
+def start(value, difficulty=0, withWithoutPoda=0):
 	block = False
 	depth = 5
 	if difficulty == 1:
@@ -447,24 +447,46 @@ def start(value, difficulty=0):
 
 		# AI Negamax turn
 		if turn == AI and not game_over:
-			print('negamax depth', depth)
-			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf)
-			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+			if withWithoutPoda == 1:
+				print('negamax depth', depth)
+				col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf)
+				# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
-			if is_valid_location(board, col):
-				row = get_next_open_row(board, col)
-				drop_piece(board, row, col, AI_PIECE)
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, AI_PIECE)
 
-				if winning_move(board, AI_PIECE):
-					label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
-					screen.blit(label, (40,10))
-					game_over = True
+					if winning_move(board, AI_PIECE):
+						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
 
-				print_board(board)
-				draw_board(board)
+					print_board(board)
+					draw_board(board)
 
-				turn += 1
-				turn = turn % 2
+					turn += 1
+					turn = turn % 2
+
+			elif withWithoutPoda == 2:
+				print('negamax depth', depth)
+				col, minimax_score = negamax(board, depth, AI_PIECE)
+				# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
+
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, AI_PIECE)
+
+					if winning_move(board, AI_PIECE):
+						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
+
+					print_board(board)
+					draw_board(board)
+
+					turn += 1
+					turn = turn % 2
+				
 
 		if game_over:
 			pygame.quit()

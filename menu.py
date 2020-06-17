@@ -85,9 +85,18 @@ while sair:
                 next_step = 2
 
         elif next_step == 2:
+            if event.key == 54:
+                menu_choices['choice_3'] = 1
+                next_step = 3
+            if event.key == 55:
+                menu_choices['choice_3'] = 2
+                next_step = 3
+
+
+        elif next_step == 3:
             if event.key == 13:
                 from connectFour import start
-                start(menu_choices['choice_1'], menu_choices['choice_2'])
+                start(menu_choices['choice_1'], menu_choices['choice_2'], menu_choices['choice_3'])
 
     if next_step == 0:
         if menu_choices['choice_1'] == 1:
@@ -109,8 +118,31 @@ while sair:
             text_3_render = font.render(text_3, True, vermelho)
             choice_1_text_render = font.render(choice_1_text, True, azul)
             fundo.blit(choice_1_text_render,(200, 260))
-    
+
     if next_step == 2:
+        if menu_choices['choice_1'] == 2:
+            choice_1_text = 'Humano contra AI'
+        if menu_choices['choice_2'] == 1:
+            choice_2_text = 'Nível fácil'
+        if menu_choices['choice_2'] == 2:
+            choice_2_text = 'Nível médio'
+        if menu_choices['choice_2'] == 3:
+            choice_2_text = 'Nível difícil'
+        
+        menu_step_text = 'Contra qual AI?'
+        menu_step_text_render = menu_step_font.render(menu_step_text, True, azul)
+        text_1 = '6 - Com poda alfa beta pruning'
+        text_2 = '7 - Sem poda alfa beta pruning'
+        text_3 = ' '
+        text_1_render = font.render(text_1, True, vermelho)
+        text_2_render = font.render(text_2, True, vermelho)
+        text_3_render = font.render(text_3, True, vermelho)
+        choice_1_text_render = font.render(choice_1_text, True, azul)
+        choice_2_text_render = font.render(choice_2_text, True, azul)
+        fundo.blit(choice_1_text_render,(200,300))
+        fundo.blit(choice_2_text_render,(200,330))
+    
+    if next_step == 3:
         if menu_choices['choice_2'] == 1:
             choice_2_text = 'Nível fácil'
             
@@ -120,10 +152,17 @@ while sair:
         if menu_choices['choice_2'] == 3:
             choice_2_text = 'Nível difícil'
 
+        if menu_choices['choice_3'] == 1:
+            choice_3_text = 'Com poda alfa beta'
+        if menu_choices['choice_3'] == 2:
+            choice_3_text = 'Sem poda alfa beta'
+
         choice_1_text_render = font.render(choice_1_text, True, azul)
         choice_2_text_render = font.render(choice_2_text, True, azul)
+        choice_3_text_render = font.render(choice_3_text, True, azul)
         fundo.blit(choice_1_text_render,(200, 260))
         fundo.blit(choice_2_text_render,(200, 290))
+        fundo.blit(choice_3_text_render,(200, 320))
         fundo.blit(start_game_text_render, (180, 380))
                     
     pygame.display.update()
