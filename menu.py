@@ -23,8 +23,8 @@ sair = True
 
 menu_choices = {'choice_1': 0, 'choice_2': 0, 'choice_3': 0}
 
-menu_step_font = pygame.font.SysFont("comicsansms", 50)
-font = pygame.font.SysFont("comicsansms", 30)
+menu_step_font = pygame.font.SysFont("arialbold", 50)
+font = pygame.font.SysFont("arialbold", 30)
 
 choice_1_text = ''
 choice_1_text_render = font.render(choice_1_text, True, azul)
