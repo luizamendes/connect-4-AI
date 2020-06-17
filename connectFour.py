@@ -27,8 +27,6 @@ BLOCKER_PIECE = 3
 
 WINDOW_LENGTH = 4
 
-VICTORY_CONDITION = 5
-
 def create_board(blockers = False):
 	board = np.zeros((ROW_COUNT,COLUMN_COUNT))
 
@@ -57,76 +55,50 @@ def get_next_open_row(board, col):
 def print_board(board):
 	print(np.flip(board, 0))
 
-def winning_move(board, piece, n):
-	count = 0
+def winning_move(board, piece):
 	# Check horizontal locations for win
-	for c in range(ROW_COUNT):
+	for c in range(COLUMN_COUNT-3):
 		for r in range(ROW_COUNT):
-			for i in range(n):
-				if(c + i < COLUMN_COUNT):
-					if(board[r][c + i] == piece):
-						count += 1
-			if count == n:
+			if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] == piece and board[r][c+3] == piece:
 				return True
-			else:
-				count = 0
-	
 
 	# Check vertical locations for win
 	for c in range(COLUMN_COUNT):
-		for r in range(n):
-			for i in range(n):
-				if(r + i < ROW_COUNT):
-					if(board[r + i][c] == piece):
-						count += 1
-			if(count == n):
+		for r in range(ROW_COUNT-3):
+			if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
 				return True
-			else:
-				count = 0
 
 	# Check positively sloped diaganols
-	for c in range(n):
-		for r in range(n):
-			for i in range(n):
-				if(r + i < ROW_COUNT and c + i < ROW_COUNT):
-					if(board[r + i][c + i] == piece):
-						count += 1
-			if(count == n):
+	for c in range(COLUMN_COUNT-3):
+		for r in range(ROW_COUNT-3):
+			if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
 				return True
-			else:
-				count = 0
 
 	# Check negatively sloped diaganols
-	for c in range(n):
-		for r in range(n):
-			for i in range(n):
-				if(r + i < ROW_COUNT and c + i < ROW_COUNT):
-					if(board[r - i][c + i] == piece):
-						count += 1
-			if count == n:
+	for c in range(COLUMN_COUNT-3):
+		for r in range(3, ROW_COUNT):
+			if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
 				return True
-			else:
-				count = 0
 
-def evaluate_window(window, piece, criterion):
+def evaluate_window(window, piece):
 	score = 0
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
 		opp_piece = AI_PIECE
 
-	if window.count(piece) == criterion:
+	if window.count(piece) == 4:
 		score += 100
-	elif window.count(piece) == criterion - 1 and window.count(EMPTY) == 1:
+	elif window.count(piece) == 3 and window.count(EMPTY) == 1:
 		score += 5
-	elif window.count(piece) == criterion - 2 and window.count(EMPTY) == 2:
+	elif window.count(piece) == 2 and window.count(EMPTY) == 2:
 		score += 2
 
-	if window.count(opp_piece) == criterion - 1 and window.count(EMPTY) == 1:
+	if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
 		score -= 4
 
 	return score
 
-def score_position(board, piece, criterion):
+def score_position(board, piece):
 	score = 0
 
 	## Score center column
@@ -139,45 +111,45 @@ def score_position(board, piece, criterion):
 		row_array = [int(i) for i in list(board[r,:])]
 		for c in range(COLUMN_COUNT-3):
 			window = row_array[c:c+WINDOW_LENGTH]
-			score += evaluate_window(window, piece, criterion)
+			score += evaluate_window(window, piece)
 
 	## Score Vertical
 	for c in range(COLUMN_COUNT):
 		col_array = [int(i) for i in list(board[:,c])]
 		for r in range(ROW_COUNT-3):
 			window = col_array[r:r+WINDOW_LENGTH]
-			score += evaluate_window(window, piece, criterion)
+			score += evaluate_window(window, piece)
 
 	## Score posiive sloped diagonal
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+i][c+i] for i in range(WINDOW_LENGTH)]
-			score += evaluate_window(window, piece, criterion)
+			score += evaluate_window(window, piece)
 
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+3-i][c+i] for i in range(WINDOW_LENGTH)]
-			score += evaluate_window(window, piece, criterion)
+			score += evaluate_window(window, piece)
 
 	return score
 
-def is_terminal_node(board, condition):
-	return winning_move(board, AI_PIECE, condition) or winning_move(board, PLAYER_PIECE, condition) or len(get_valid_locations(board)) == 0
+def is_terminal_node(board):
+	return winning_move(board, AI_PIECE) or winning_move(board, PLAYER_PIECE) or len(get_valid_locations(board)) == 0
 
 # Minimax com poda
-def minimaxAB(board, depth, alpha, beta, maximizingPlayer, condition):
+def minimaxAB(board, depth, alpha, beta, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
-	is_terminal = is_terminal_node(board, condition)
+	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, AI_PIECE, condition):
+			if winning_move(board, AI_PIECE):
 				return (None, 100000000000000)
-			elif winning_move(board, PLAYER_PIECE, condition):
+			elif winning_move(board, PLAYER_PIECE):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, AI_PIECE, condition))
+			return (None, score_position(board, AI_PIECE))
 	if maximizingPlayer:
 		value = -math.inf
 		column = random.choice(valid_locations)
@@ -185,7 +157,7 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer, condition):
 			row = get_next_open_row(board, col)
 			b_copy = board.copy()
 			drop_piece(b_copy, row, col, AI_PIECE)
-			new_score = minimaxAB(b_copy, depth-1, alpha, beta, False, condition)[1]
+			new_score = minimaxAB(b_copy, depth-1, alpha, beta, False)[1]
 			if new_score > value:
 				value = new_score
 				column = col
@@ -201,7 +173,7 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer, condition):
 			row = get_next_open_row(board, col)
 			b_copy = board.copy()
 			drop_piece(b_copy, row, col, PLAYER_PIECE)
-			new_score = minimaxAB(b_copy, depth-1, alpha, beta, True, condition)[1]
+			new_score = minimaxAB(b_copy, depth-1, alpha, beta, True)[1]
 			if new_score < value:
 				value = new_score
 				column = col
@@ -211,19 +183,19 @@ def minimaxAB(board, depth, alpha, beta, maximizingPlayer, condition):
 		return column, value
 
 # Minimax sem poda    
-def minimax(board, depth, maximizingPlayer, condition):
+def minimax(board, depth, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
-	is_terminal = is_terminal_node(board, condition)
+	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, AI_PIECE, condition):
+			if winning_move(board, AI_PIECE):
 				return (None, 100000000000000)
-			elif winning_move(board, PLAYER_PIECE, condition):
+			elif winning_move(board, PLAYER_PIECE):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, AI_PIECE, condition))
+			return (None, score_position(board, AI_PIECE))
 	if maximizingPlayer:
 		value = -math.inf
 		column = random.choice(valid_locations)
@@ -231,7 +203,7 @@ def minimax(board, depth, maximizingPlayer, condition):
 			row = get_next_open_row(board, col)
 			b_copy = board.copy()
 			drop_piece(b_copy, row, col, AI_PIECE)
-			new_score = minimax(b_copy, depth-1, False, condition)[1]
+			new_score = minimax(b_copy, depth-1, False)[1]
 			if new_score > value:
 				value = new_score
 				column = col
@@ -244,30 +216,30 @@ def minimax(board, depth, maximizingPlayer, condition):
 			row = get_next_open_row(board, col)
 			b_copy = board.copy()
 			drop_piece(b_copy, row, col, PLAYER_PIECE)
-			new_score = minimax(b_copy, depth-1, True, condition)[1]
+			new_score = minimax(b_copy, depth-1, True)[1]
 			if new_score < value:
 				value = new_score
 				column = col
 		return column, value
 
 # Negamax sem poda
-def negamax(board, depth, piece, condition):
+def negamax(board, depth, piece):
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
 		opp_piece = AI_PIECE
 	
 	valid_locations = get_valid_locations(board)
-	is_terminal = is_terminal_node(board, condition)
+	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, piece, condition):
+			if winning_move(board, piece):
 				return (None, 100000000000000)
-			elif winning_move(board, opp_piece, condition):
+			elif winning_move(board, opp_piece):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, piece, condition))
+			return (None, score_position(board, piece))
 			
 	value = -math.inf
 	column = random.choice(valid_locations)
@@ -277,32 +249,32 @@ def negamax(board, depth, piece, condition):
 		b_copy = board.copy()
 		drop_piece(b_copy, row, col, piece)
 		if piece == PLAYER_PIECE:
-			new_score = -negamax(b_copy, depth-1, AI_PIECE, condition)[1]
+			new_score = -negamax(b_copy, depth-1, AI_PIECE)[1]
 		else:
-			new_score = -negamax(b_copy, depth-1, PLAYER_PIECE, condition)[1]
+			new_score = -negamax(b_copy, depth-1, PLAYER_PIECE)[1]
 		if new_score > value:
 			value = new_score
 			column = col
 	return column, value
 
 # Negamax com poda
-def negamaxAB(board, depth, piece, alpha, beta, condition):
+def negamaxAB(board, depth, piece, alpha, beta):
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
 		opp_piece = AI_PIECE
 	
 	valid_locations = get_valid_locations(board)
-	is_terminal = is_terminal_node(board,condition)
+	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, piece, condition):
+			if winning_move(board, piece):
 				return (None, 100000000000000)
-			elif winning_move(board, opp_piece, condition):
+			elif winning_move(board, opp_piece):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, piece, condition))
+			return (None, score_position(board, piece))
 			
 	value = -math.inf
 	column = random.choice(valid_locations)
@@ -312,9 +284,9 @@ def negamaxAB(board, depth, piece, alpha, beta, condition):
 		b_copy = board.copy()
 		drop_piece(b_copy, row, col, piece)
 		if piece == PLAYER_PIECE:
-			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -beta, -alpha, condition)[1]
+			new_score = -negamaxAB(b_copy, depth-1, AI_PIECE, -beta, -alpha)[1]
 		else:
-			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -beta, -alpha, condition)[1]
+			new_score = -negamaxAB(b_copy, depth-1, PLAYER_PIECE, -beta, -alpha)[1]
 		if new_score > value:
 			value = new_score
 			column = col
@@ -364,7 +336,7 @@ pygame.display.set_caption("Lig-4")
 myfont = pygame.font.SysFont("monospace", 75)
 
 
-def start(value, criterion, difficulty=0):
+def start(value, difficulty=0):
 	block = False
 	depth = 5
 	if difficulty == 1:
@@ -383,8 +355,6 @@ def start(value, criterion, difficulty=0):
 	pygame.display.update()
 	game_over = False
 	turn = random.randint(PLAYER, AI)
-
-	print('critério',criterion)
 	
 	while not game_over:
 		for event in pygame.event.get():
@@ -404,13 +374,13 @@ def start(value, criterion, difficulty=0):
 		if value == 1:
 			# AI with Minimax with pruning
 			if turn == PLAYER and not game_over:				
-				col, minimax_score = minimaxAB(board, depth, -math.inf, math.inf, True, criterion)
+				col, minimax_score = minimaxAB(board, depth, -math.inf, math.inf, True)
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, PLAYER_PIECE)
 
-					if winning_move(board, PLAYER_PIECE, criterion):
+					if winning_move(board, PLAYER_PIECE):
 						label = myfont.render("MINIMAX VENCEU!!!", 1, RED)
 						screen.blit(label, (40,10))
 						game_over = True
@@ -423,13 +393,13 @@ def start(value, criterion, difficulty=0):
 					
 			# AI with Negamax with pruning
 			if turn == AI and not game_over:				
-				col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf, criterion)
+				col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf)
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, AI_PIECE)
 
-					if winning_move(board, AI_PIECE, criterion):
+					if winning_move(board, AI_PIECE):
 						label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
 						screen.blit(label, (40,10))
 						game_over = True
@@ -463,7 +433,7 @@ def start(value, criterion, difficulty=0):
 							row = get_next_open_row(board, col)
 							drop_piece(board, row, col, PLAYER_PIECE)
 
-							if winning_move(board, PLAYER_PIECE, criterion):
+							if winning_move(board, PLAYER_PIECE):
 								label = myfont.render("HUMANO VENCEU!!!", 1, RED)
 								screen.blit(label, (40,10))
 								game_over = True
@@ -478,14 +448,14 @@ def start(value, criterion, difficulty=0):
 		# AI Negamax turn
 		if turn == AI and not game_over:
 			print('negamax depth', depth)
-			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf, criterion)
+			col, minimax_score = negamaxAB(board, depth, AI_PIECE, -math.inf, math.inf)
 			# col, minimax_score = minimaxAB(board, 5, -math.inf, math.inf, True)
 
 			if is_valid_location(board, col):
 				row = get_next_open_row(board, col)
 				drop_piece(board, row, col, AI_PIECE)
 
-				if winning_move(board, AI_PIECE, criterion):
+				if winning_move(board, AI_PIECE):
 					label = myfont.render("NEGAMAX VENCEU!!!", 1, YELLOW)
 					screen.blit(label, (40,10))
 					game_over = True
